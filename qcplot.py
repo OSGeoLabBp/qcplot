@@ -85,7 +85,7 @@ fn = argv[1]
 if fn[-4:] in ext:
     fn = fn[:-4]    # remove extension
 
-[azi, ele, snr] = [qcfile(argv[1] + x) for x in ext]
+[azi, ele, snr] = [qcfile(fn + x) for x in ext]
 # check for error
 for i in [azi, ele, snr]:
     if i.state != 0:
