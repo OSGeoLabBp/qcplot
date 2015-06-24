@@ -1,7 +1,6 @@
 #script to draw snr skyplot from qcplot.py output
 #usage example:
-#python qcplot bute1690 snr1
-#sort -k3 -r data.txt > data2.txt
+#python qcplot bute1690 snr1 | sort -k3 -r > data2.txt
 #gnuplot recplot.plt 
 set terminal png small size 480,360
 set output 'recplot.png'
