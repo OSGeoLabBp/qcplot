@@ -22,6 +22,9 @@ if [ "$3" == "all" -a $# -lt 5 ]; then
 	echo "usage: qcplot input_file type output_type image_file [image_file1]"
 	exit -1
 fi
+if [ "$3" != "skyplot" -o "$3" != "recplot" -o "$3" != "all" ]; then 
+	echo "usage: qcplot input_file type output_type image_file [image_file1]"
+fi
 if [ ! -f $SKYTEMPLATE ]; then
 	echo "skyplot template not found: $SKYTEMPLATE"
 	exit -2
@@ -30,7 +33,8 @@ if [ ! -f $RECTEMPLATE ]; then
 	echo "recplot template not found: $RECTEMPLATE"
 	exit -3
 fi
-
+station=${1::4} # station name: first four characters in filename
+doy=${1:4:3} # day of year: next three characters in filename
 OF=$RANDOM
 OF1=${TMPPATH}${OF}.txt
 OF2=${TMPPATH}${OF}.out
@@ -43,17 +47,17 @@ fi
 sort -k3 -r $OF1 > $OF2 
 case "$3" in
 	skyplot)
-		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% $SKYTEMPLATE > $SKYPLT
+		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $SKYTEMPLATE > $SKYPLT
 		gnuplot $SKYPLT
 		;;
 	recplot)
-		sed -e s%reckyplot.png%$4% -e s%data2.txt%$OF2% $RECTEMPLATE > $RECPLT
+		sed -e s%reckyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $RECTEMPLATE > $RECPLT
 		gnuplot $RECPLT
 		;;
 	all)
-		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% $SKYTEMPLATE > $SKYPLT
+		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $SKYTEMPLATE > $SKYPLT
 		gnuplot $SKYPLT
-		sed -e s%recplot.png%$4% -e s%data2.txt%$OF2% $RECTEMPLATE > $RECPLT
+		sed -e s%recplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $RECTEMPLATE > $RECPLT
 		gnuplot $RECPLT
 		;;
 esac
