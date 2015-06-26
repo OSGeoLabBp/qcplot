@@ -13,7 +13,7 @@ set xtics 30
 set ytics 10
 set palette defined (10 "red", 30 "yellow", 60 "dark-green")
 set cbrange [10:60]
-set title 'station: bute, date: 169/2015, type: snr1'
+set title 'station: ssss, date: ddd/yyyy, type: ttt'
 set label 1 'created by qcplot' at graph 0.9,-0.1 front
 set label 2 'SNR [dB-Hz]' at graph 0.95,1.05 front
 plot 'data2.txt' using 1:2:3 notitle palette pt 7 ps 0.5
