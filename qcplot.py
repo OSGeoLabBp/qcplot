@@ -3,7 +3,7 @@
 """
 .. module:: qcplot.py
 
-.. moduleauthor:: Takacs Bence
+.. moduleauthor:: Siki Zoltan, Takacs Bence
 
 Sample application to plot teqc output
 this python script merges teqc output files (.azi, .ele, .sn?)
@@ -21,7 +21,7 @@ example: python qcplot.py bute1690 sn1
     :param argv[2]: type of plot sn1 (=snr1) or sn2 (=snr2)
 """
 
-from sys import argv
+import sys
 
 class qcfile(object):
     """ qcfile class handles a ...
@@ -72,16 +72,16 @@ class qcfile(object):
             return None
         return dict(zip(self.last, buf.split()))
         
-if len(argv) < 3:
+if len(sys.argv) < 3:
     print "usage: ./qcplot.py filename plottype"
     exit(1)
-if not (argv[2] == 'sn1' or argv[2] == 'sn2'):
+if not (sys.argv[2] == 'sn1' or sys.argv[2] == 'sn2'):
     print "usage: ./qcplot.py filename plottype"
     print "plottype should be sn1 or sn2"
     exit(1)
 
-ext = ('.azi', '.ele', '.' + argv[2])
-fn = argv[1]
+ext = ('.azi', '.ele', '.' + sys.argv[2])
+fn = sys.argv[1]
 if fn[-4:] in ext:
     fn = fn[:-4]    # remove extension
 
@@ -89,7 +89,7 @@ if fn[-4:] in ext:
 # check for error
 for i in [azi, ele, snr]:
     if i.state != 0:
-        print "error with file: " + i.fname 
+        print >> sys.stderr, "error with file: " + i.fname 
         exit(-1)
 
 while 1:
