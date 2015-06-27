@@ -13,7 +13,7 @@ usage of teqc: teqc +qc -nav brdc1690.15n bute1690.15o
 the output of qcplot.py is sent to stdout which contains each measurement in a
 separate line
 
-format: azimuth 90-elevation snr1 (or snr2)
+format: azimuth elevation snr1 (or snr2)
 
 example: python qcplot.py bute1690 sn1    
 
@@ -66,18 +66,18 @@ class qcfile(object):
             return None
         if buf != '-1': 
             self.last = buf.split()[1:]
-        buf = self.fp.readline()    #azimuth values of satellites
+        buf = self.fp.readline()    #azimuth/elevation/snr values of satellites
         if not buf:
             self.state = -3
             return None
         return dict(zip(self.last, buf.split()))
         
 if len(sys.argv) < 3:
-    print "usage: ./qcplot.py filename plottype"
+    print >> sys.stderr, "usage: ./qcplot.py filename plottype"
     exit(1)
 if not (sys.argv[2] == 'sn1' or sys.argv[2] == 'sn2'):
-    print "usage: ./qcplot.py filename plottype"
-    print "plottype should be sn1 or sn2"
+    print >> sys.stderr, "usage: ./qcplot.py filename plottype"
+    print >> sys.stderr, "plottype should be sn1 or sn2"
     exit(1)
 
 ext = ('.azi', '.ele', '.' + sys.argv[2])
