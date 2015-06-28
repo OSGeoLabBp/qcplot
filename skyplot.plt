@@ -3,7 +3,7 @@
 #python qcplot bute1690 snr1 | sort -k3 -r > data2.txt
 #gnuplot skyplot.plt 
 unset border
-set terminal png medium size 480,480
+set terminal png small size 480,480
 set rmargin 10
 set lmargin 5
 set tmargin 4
@@ -12,7 +12,7 @@ set output 'skyplot.png'
 set palette defined (10 "red", 30 "yellow", 60 "dark-green")
 set cbrange [10:60]
 set colorbox vertical user origin .9, .2 size .04,.5
-set title 'station: ssss, date: ddd/yyyy, type: ttt' offset 0,1
+set title 'station: ssss, date: session/ddd/yyyy, type: ttt' offset 0,1
 set label 1 'created by qcplot' at graph 0.85,-0.05 front
 set label 2 'SNR [dB-Hz]' at graph 0.95,.8 front
 set polar
