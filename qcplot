@@ -1,11 +1,9 @@
 #! /bin/bash
-# script to create skyplot or recplot
-# usage: qcplot input_file type output_type image_file [image_file1]
-#    input_file: name of input azi/ele/sn1/sn2 (extension optional)
-#    type: sn1/sn2
-#    output_type: skyplot/recplot/all
-#    image_file: name of output image file (png), name of skyplot file if output_type is all
-#    image_file1: used only if output_type is all, name of recplot file (png)
+# script to run teqc and create skyplot or recplot from snr values
+# usage: qcplot rinex_observation_file rinex_navigation_file type
+#    rinex_observation_file: ssssddds.yyo, ssss=station id, ddd=day of year, s=session, yy=year
+#    rinex_navigation_file 
+#    type: sn1/sn2, default is sn1
 # *** start of customizable part ***
 TMPPATH=/tmp/
 TEMPLATEPATH=./
@@ -14,52 +12,60 @@ REC=recplot.plt
 SKYTEMPLATE=${TEMPLATEPATH}${SKY}
 RECTEMPLATE=${TEMPLATEPATH}${REC}
 # *** end of customizable part ***
-if [ $# -lt 4 ]; then
-	echo "usage: qcplot input_file type output_type image_file [image_file1]"
+if [ $# -lt 3 ]; then
+	echo "usage: qcplot2 rinex_observation_file rinex_navigation_file type"
+    echo "too few arguments"
 	exit -1
 fi
-if [ "$3" == "all" -a $# -lt 5 ]; then
-	echo "usage: qcplot input_file type output_type image_file [image_file1]"
-	exit -1
+if [ ! -f $1 ]; then
+    echo "rinex observation file not found"
+    exit -2
+fi 
+if [ ! -f $2 ]; then
+    echo "rinex navigation file not found"
+    exit -3
 fi
-if [ "$3" != "skyplot" -o "$3" != "recplot" -o "$3" != "all" ]; then 
-	echo "usage: qcplot input_file type output_type image_file [image_file1]"
+if [ ${#1} != 12 ]; then
+    echo "rinex observation filename should have 12 character"
+    echo $1 "has" ${#1} "character"
+    exit -4
 fi
+if [ "$3" == "sn2" ]; then
+    echo $3
+    typ0="sn2"
+    typ="snr2"
+else
+    typ0="sn1"    
+    typ="snr1"
+fi  
 if [ ! -f $SKYTEMPLATE ]; then
 	echo "skyplot template not found: $SKYTEMPLATE"
-	exit -2
+	exit -5
 fi
 if [ ! -f $RECTEMPLATE ]; then
 	echo "recplot template not found: $RECTEMPLATE"
-	exit -3
+	exit -6
 fi
-station=${1::4} # station name: first four characters in filename
-doy=${1:4:3} # day of year: next three characters in filename
+station=${1::4} # station name: first four characters in rinex observation filename
+doy=${1:4:3} # day of year: next three characters in rinex observation filename
+session=${1:7:1} # day of year: next three characters in rinex observation filename
+year=${1:9:2} # day of year: next three characters in rinex observation filename
+year=20$year
 OF=$RANDOM
 OF1=${TMPPATH}${OF}.txt
 OF2=${TMPPATH}${OF}.out
+OF3=${TMPPATH}${OF}.rep
 SKYPLT=${TMPPATH}sky${OF}.plt
 RECPLT=${TMPPATH}rec${OF}.plt
-./qcplot.py $1 $2 > $OF1
+teqc +qc -s -nav $2 $1 > $OF3
+./qcplot.py ${1::8} $typ0 > $OF1
 if [ $? -ne 0 ]; then
 	exit -1
 fi
 sort -k3 -r $OF1 > $OF2 
-case "$3" in
-	skyplot)
-		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $SKYTEMPLATE > $SKYPLT
-		gnuplot $SKYPLT
-		;;
-	recplot)
-		sed -e s%reckyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $RECTEMPLATE > $RECPLT
-		gnuplot $RECPLT
-		;;
-	all)
-		sed -e s%skyplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $SKYTEMPLATE > $SKYPLT
-		gnuplot $SKYPLT
-		sed -e s%recplot.png%$4% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%ttt%$2% $RECTEMPLATE > $RECPLT
-		gnuplot $RECPLT
-		;;
-esac
+sed -e s%skyplot.png%${1::8}sky.png% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%yyyy%$year% -e s%session%$session% -e s%ttt%$typ% $SKYTEMPLATE > $SKYPLT
+gnuplot $SKYPLT
+sed -e s%recplot.png%${1::8}rec.png% -e s%data2.txt%$OF2% -e s%ssss%$station% -e s%ddd%$doy% -e s%yyyy%$year% -e s%session%$session% -e s%ttt%$typ% $RECTEMPLATE > $RECPLT
+gnuplot $RECPLT
 # clean up
-rm -f $SKYPLT $RECPLT $OF1 $OF2
+rm -f $SKYPLT $RECPLT $OF1 $OF2 $OF3
